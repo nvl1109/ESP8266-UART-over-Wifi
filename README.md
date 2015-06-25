@@ -5,9 +5,9 @@ Absolutely transparent bridge for the ESP8266
 
 This is really basic firmware for the ESP that creates a totally transparent TCP socket to ESP UART0 bridge. Characters come in on one interface and go out the other. The totally transparent bridge mode is something that has been missing and is available on higher priced boards.
 
-**Pros: **
+**Pros:**
 * It works. Do you already have a serial project to which you just want to add WiFi? This is your ticket.
-* Auto connect to any wifi AP with smart config configured. After 10s, if the ESP device could not connect to AP, the smart config will be started, and then you can use the smart phone with ESP TOUCH installed to talk to your ESP device connects to your wifi as you want.
+* Auto connect to any wifi AP with *smart config* configured. After 10s, if the ESP device could not connect to AP, the smart config will be started, and then you can use the smart phone with ESP TOUCH installed to talk to your ESP device connects to your wifi as you want.
 * Configure the UART information by telnet into the module and issue commands prefixed by +++AT to escape each command from bridge mode.
 ```
 +++AT                                    # do nothing, print OK
@@ -52,6 +52,12 @@ All incoming UART characters in the FIFO gets sent immediately via the tx-buffer
 
 This could potentially impact performance, however, in my hands that hasn't been an issue.
 
+Folder structure, make sure your folder structure is made like this:
+```
+  |- xtensa-lx106-elf
+  |- esp_iot_sdk_v1.1.1
+     |- ESP8266-UART-over-Wifi
+```
 
 Build command:
 ```
