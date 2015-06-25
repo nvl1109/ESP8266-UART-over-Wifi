@@ -8,6 +8,7 @@
 #include "mem.h"
 #include "osapi.h"
 #include "driver/uart.h"
+#include "smartconfig.h"
 
 #include "flash_param.h"
 #include "server.h"
@@ -346,106 +347,10 @@ void config_cmd_port(serverConnData *conn, uint8_t argc, char *argv[]) {
 	}
 }
 
-void config_cmd_mode(serverConnData *conn, uint8_t argc, char *argv[]) {
-	uint8_t mode;
-
-	if (argc == 0) {
-		espbuffsentprintf(conn, "MODE=%d\r\n"MSG_OK, wifi_get_opmode());
-	} else if (argc != 1) {
-		espbuffsentstring(conn, MSG_ERROR);
-	} else {
-		mode = atoi(argv[1]);
-		if (mode >= 1 && mode <= 3) {
-			if (wifi_get_opmode() != mode) {
-				ETS_UART_INTR_DISABLE();
-				wifi_set_opmode(mode);
-				ETS_UART_INTR_ENABLE();
-				espbuffsentstring(conn, MSG_OK);
-				os_delay_us(10000);
-				system_restart();
-			} else {
-				espbuffsentstring(conn, MSG_OK);
-			}
-		} else {
-			espbuffsentstring(conn, MSG_ERROR);
-		}
-	}
-}
-
-// spaces are not supported in the ssid or password
-void config_cmd_sta(serverConnData *conn, uint8_t argc, char *argv[]) {
-	char *ssid = argv[1], *password = argv[2];
-	struct station_config sta_conf;
-
-	os_bzero(&sta_conf, sizeof(struct station_config));
-	wifi_station_get_config(&sta_conf);
-
-	if (argc == 0)
-		espbuffsentprintf(conn, "SSID=%s PASSWORD=%s\r\n"MSG_OK, sta_conf.ssid, sta_conf.password);
-	 else if (argc != 2)
-		espbuffsentstring(conn, MSG_ERROR);
-	else {
-		os_strncpy(sta_conf.ssid, ssid, sizeof(sta_conf.ssid));
-		os_strncpy(sta_conf.password, password, sizeof(sta_conf.password));
-		espbuffsentstring(conn, MSG_OK);
-		wifi_station_disconnect();
-		ETS_UART_INTR_DISABLE();
-		wifi_station_set_config(&sta_conf);
-		ETS_UART_INTR_ENABLE();
-		wifi_station_connect();
-	}
-}
-
-// spaces are not supported in the ssid or password
-void config_cmd_ap(serverConnData *conn, uint8_t argc, char *argv[]) {
-	char *ssid = argv[1], *password = argv[2];
-	struct softap_config ap_conf;
-#define MAXAUTHMODES 5
-	os_bzero(&ap_conf, sizeof(struct softap_config));
-	wifi_softap_get_config(&ap_conf);
-	if (argc == 0)
-		espbuffsentprintf(conn, "SSID=%s PASSWORD=%s AUTHMODE=%d CHANNEL=%d\r\n"MSG_OK, ap_conf.ssid, ap_conf.password, ap_conf.authmode, ap_conf.channel);
-	else if (argc > 4)
-		espbuffsentstring(conn, MSG_ERROR);
-	else { //argc > 0
-		os_strncpy(ap_conf.ssid, ssid, sizeof(ap_conf.ssid));
-		ap_conf.ssid_len = strlen(ssid); //without set ssid_len, no connection to AP is possible
-		if (argc == 1) { //  no password
-			os_bzero(ap_conf.password, sizeof(ap_conf.password));
-			ap_conf.authmode = AUTH_OPEN;
-		} else { // with password
-			os_strncpy(ap_conf.password, password, sizeof(ap_conf.password));
-			if (argc > 2) { // authmode
-				int amode = atoi(argv[3]);
-				if ((amode < 1) || (amode>4)) {
-					espbuffsentstring(conn, MSG_ERROR);
-					return;
-				}
-				ap_conf.authmode = amode;
-			}
-			if (argc > 3) { //channel
-				int chan = atoi(argv[4]);
-				if ((chan < 1) || (chan>13)){
-					espbuffsentstring(conn, MSG_ERROR);
-					return;
-				}
-				ap_conf.channel = chan;
-			}
-		}
-		espbuffsentstring(conn, MSG_OK);
-		ETS_UART_INTR_DISABLE();
-		wifi_softap_set_config(&ap_conf);
-		ETS_UART_INTR_ENABLE();
-	}
-}
-
 const config_commands_t config_commands[] = {
 		{ "RESET", &config_cmd_reset },
 		{ "BAUD", &config_cmd_baud },
 		{ "PORT", &config_cmd_port },
-		{ "MODE", &config_cmd_mode },
-		{ "STA", &config_cmd_sta },
-		{ "AP", &config_cmd_ap },
 		{ "FLASH", &config_cmd_flash },
 		{ "GPIO2", &config_cmd_gpio2 },
 		{ NULL, NULL }
