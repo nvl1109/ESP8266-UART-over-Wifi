@@ -28,12 +28,6 @@
 *.x86_64
 *.hex
 
-## Ignore Visual Studio temporary, user, log files
-*.log
-*.opensdf
-*.sdf
-*.suo
-*.user
-
-# Build directory
-build/
+# Debug files
+*.dSYM/
+\.output

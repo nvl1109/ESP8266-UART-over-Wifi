@@ -1,4 +1,4 @@
-ESP8266-transparent-bridge
+ESP8266 UART over Wifi
 ==========================
 
 [![Join the chat at https://gitter.im/beckdac/ESP8266-transparent-bridge](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/beckdac/ESP8266-transparent-bridge?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
@@ -123,7 +123,7 @@ ESP8266-transparent-bridge.vcxproj       #project file, with IncludePath to xten
 espmake.cmd                              #batch file called by build, rebuild, clean command, which set the path and call make with Makefile_VS2013
 Makefile_VS2013                          #the makefile called by the Visual Studio NMake project via espmake.cmd
 ```
-The Debug config is used for compile, Release for compile & flash with esptool-py.py  
+The Debug config is used for compile, Release for compile & flash with esptool-py.py
 
 The following absolute path names and COM Port number are expected:
 ```
